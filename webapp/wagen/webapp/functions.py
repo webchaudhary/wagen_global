@@ -125,7 +125,7 @@ def render_pdf(htmlfile2, jobid):
     with open(report2path, 'w') as file:
         file.write(str(soup))
 
-    reportpdfpath = os.path.join(settings.MEDIA_ROOT, jobid, 'report2.pdf')
+    reportpdfpath = os.path.join(settings.MEDIA_ROOT, jobid, 'report.pdf')
     HTML(report2path).write_pdf(reportpdfpath)
     return reportpdfpath
 

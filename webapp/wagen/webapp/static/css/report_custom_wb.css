@@ -26,23 +26,41 @@
     font-display: swap;
 }
 
-body {
+.main_section{
+    width: 100%;
+    height: 100vh;
     overflow: hidden;
 }
 
-/* Scrollbar CSS */
-#secLeft::-webkit-scrollbar , #secRight::-webkit-scrollbar {
+body {
+margin: 0px;
+padding: 0px;
+}
+
+#secLeft, #secRight {
+    height: calc(100vh - 150px);
+    overflow-y: auto; /* Ensure these sections can scroll vertically */
+}
+
+#secLeft::-webkit-scrollbar, #secRight::-webkit-scrollbar {
     width: 3px;
-  }
-   
-#secLeft::-webkit-scrollbar-track , #secRight::-webkit-scrollbar-track {
+}
+
+#secLeft::-webkit-scrollbar-track, #secRight::-webkit-scrollbar-track {
     box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  }
-   
-#secLeft::-webkit-scrollbar-thumb , #secRight::-webkit-scrollbar-thumb {
+}
+
+#secLeft::-webkit-scrollbar-thumb, #secRight::-webkit-scrollbar-thumb {
     background-color: #7e7c6e;
     outline: 1px solid #faf6e0;
-  }
+}
+
+/* Optional: For compatibility with Firefox */
+#secLeft, #secRight {
+    scrollbar-width: thin;
+    scrollbar-color: #7e7c6e #faf6e0;
+}
+
 
 /* Universal css */
 #secLeft{
@@ -146,7 +164,7 @@ button:hover{
 /* Individual Element Css */
 .img-fluid{
     background-image: url('../imgs/banner.jpg');
-    height: auto;
+    height: 150px;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: contain;

@@ -11,21 +11,32 @@ $('#startTourBtn').click(function () {
     {
       element: document.querySelector('.step-1'),
       title: '1. Base layers',
-      intro: 'List of background layers are provided to explore the study area. National and basin boundaries which can be added as study area.',
+      intro: 'List of background layers are provided to explore the study area. India States and basins boundaries which can be added as study area.',
       tooltipClass : 'step-1-tooltip',
       highlightClass : 'step-highlight',
       hidePrev : true,
       position: 'right'
     },
+    
+    // {
+    //   element: document.querySelector('.step-2'),
+    //   title: '2. Upload study area',
+    //   intro: 'User can upload a spatial boundary in GeoJSON/KML formats. Note that the name of the study area will taken from the column specified in the form. If it is a multi-polygon, each polygon feature will be saved as separate area.',
+    //   tooltipClass : 'step-2-tooltip',
+    //   highlightClass : 'side-icons-highlight',
+    //   hidePrev : false,
+    //   position: 'left'
+    // },
     {
-      element: document.querySelector('.step-2'),
-      title: '2. Upload study area',
-      intro: 'User can upload a spatial boundary in GeoJSON/KML formats. Note that the name of the study area will taken from the column specified in the form. If it is a multi-polygon, each polygon feature will be saved as separate area.',
-      tooltipClass : 'step-2-tooltip',
-      highlightClass : 'side-icons-highlight',
-      hidePrev : false,
-      position: 'left'
+      element: document.querySelector('.step-4'),
+      title: '2. Add study area',
+      intro: 'Add your study area from the drop down of saved list of boundaries',
+      tooltipClass : 'step-4-tooltip',
+      highlightClass : 'step-highlight',
+      hidePrev : true,
+      position: 'right'
     },
+
     {
       element: document.querySelector('.step-3'),
       title: '3. Digitize study area',
@@ -35,13 +46,14 @@ $('#startTourBtn').click(function () {
       hidePrev : false,
       position: 'left'
     },
+ 
     {
-      element: document.querySelector('.step-4'),
-      title: '4. Select study area',
-      intro: 'Select your study area from the drop down of saved list of boundaries',
-      tooltipClass : 'step-4-tooltip',
+      element: document.querySelector('.step-6'),
+      title: '4. Select Data Products ',
+      intro: 'Select the Precipitation and ET product to be used in the analysis for the report.',
+      tooltipClass : 'step-6-tooltip',
       highlightClass : 'step-highlight',
-      hidePrev : true,
+      hidePrev : false,
       position: 'right'
     },
     {
@@ -51,15 +63,6 @@ $('#startTourBtn').click(function () {
       tooltipClass : 'step-5-tooltip',
       highlightClass : 'step-highlight',
       hidePrev : true,
-      position: 'right'
-    },
-    {
-      element: document.querySelector('.step-6'),
-      title: '6. Select Data Products ',
-      intro: 'Select the Precipitation and ET product to be used in the analysis for the report.',
-      tooltipClass : 'step-6-tooltip',
-      highlightClass : 'step-highlight',
-      hidePrev : false,
       position: 'right'
     },
     {
@@ -83,7 +86,7 @@ $('#startTourBtn').click(function () {
     {
       element: document.querySelector('.step-9'),
       title: 'Logout',
-      intro: 'Log out from the water accounting app.',
+      intro: 'Log out from the India Water Accounting Dashboard.',
       tooltipClass : 'step-9-tooltip',
       highlightClass : 'side-icons-highlight',
       hidePrev : false,

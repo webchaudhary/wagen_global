@@ -48,7 +48,7 @@ def showmap(request):
 @login_required
 @csrf_exempt
 def addFeature(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST" and request.accepts('text/html'):
         name = request.POST.get('name')
         geomstr = request.POST.get('geom')
         if name and geomstr:
@@ -81,7 +81,7 @@ def addFeature(request):
 @login_required
 @csrf_exempt
 def addLayer(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST" and request.accepts('text/html'):
         namecolumn = request.POST.get('namecol')
         if not namecolumn:
             return JsonResponse({"result": "No name of column to select"},
@@ -152,7 +152,7 @@ def addLayer(request):
 @login_required
 @csrf_exempt
 def getReport(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST" and request.accepts('text/html'):
         areaid = request.POST.get('id')
         start = request.POST.get('start')
         end = request.POST.get('end')

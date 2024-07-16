@@ -64,7 +64,7 @@ def simple_test(self, area, start, stop, precip, et, current_user):
     user = TmpSession()
     # user.open(gisdb=settings.GRASS_DB, location='job{}'.format(jobid),
     #               create_opts='EPSG:4326')
-    user.open(gisdb=settings.GRASS_DB, location='wagen',
+    user.open(gisdb=settings.GRASS_DB, location='wagen_global',
         mapset='{}'.format(jobid), create_opts='EPSG:4326')
 
     from grass.pygrass.raster import RasterRow
@@ -192,12 +192,12 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     user = TmpSession()
     #user.open(gisdb=settings.GRASS_DB, location='job{}'.format(jobid),
     #               create_opts='EPSG:4326')
-    #user.open(gisdb=settings.GRASS_DB, location='wagen',
+    #user.open(gisdb=settings.GRASS_DB, location='wagen_global',
                    #mapset='job{}'.format(jobid), create_opts='EPSG:4326')
-    user.open(gisdb=settings.GRASS_DB, location='wagen',
+    user.open(gisdb=settings.GRASS_DB, location='wagen_global',
                    mapset='job{}'.format(jobid), create_opts='')
     #gisdb=settings.GRASS_DB
-    #location='wagen'
+    #location='wagen_global'
     #mapset='job{}'.format(jobid)
     #session = gsetup.init(gisdb, location, mapset)
 
@@ -598,12 +598,25 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     pminuset=raster2numpy("pminuset", mapset='job{}'.format(jobid))
     pminuset = np.ma.masked_where(pminuset == -2147483648, pminuset)
     fig, ax = plt.subplots(figsize = (12,8))
+    
     if np.nanmax(pminuset) > 0:
+           print('first condition for divnorm')
            divnorm=colors.TwoSlopeNorm(vmin=np.nanmin(pminuset), vcenter=0, vmax=np.nanmax(pminuset))
     else:
-           divnorm=colors.TwoSlopeNorm(vmin=np.nanmin(pminuset), vcenter=np.nanmean(pminuset), vmax=np.nanmax(pminuset))    
+           print('second condition for divnorm')
+           divnorm=colors.TwoSlopeNorm(vmin=np.nanmin(pminuset), vcenter=np.nanmedian(pminuset), vmax=np.nanmax(pminuset))   
     plt.imshow(pminuset, cmap='RdYlBu', extent=spatial_extent, norm=divnorm, interpolation='none', resample=False)
-    #plt.imshow(pminuset, cmap='RdYlBu', vmin=-1000, vmax=np.nanmax(pminuset),extent=spatial_extent, interpolation='none', resample=False)
+    plt.imshow(pminuset, cmap='RdYlBu', vmin=-1000, vmax=np.nanmax(pminuset),extent=spatial_extent, interpolation='none', resample=False)
+    
+    
+#     if np.nanmax(pminuset) > 0:
+#            divnorm=colors.TwoSlopeNorm(vmin=np.nanmin(pminuset), vcenter=0, vmax=np.nanmax(pminuset))
+#     else:
+#            divnorm=colors.TwoSlopeNorm(vmin=np.nanmin(pminuset), vcenter=np.nanmean(pminuset), vmax=np.nanmax(pminuset))    
+#     plt.imshow(pminuset, cmap='RdYlBu', extent=spatial_extent, norm=divnorm, interpolation='none', resample=False)
+#     plt.imshow(pminuset, cmap='RdYlBu', vmin=-1000, vmax=np.nanmax(pminuset),extent=spatial_extent, interpolation='none', resample=False) 
+
+
     scalebar = ScaleBar(100, 'km', box_color='w', box_alpha=0.7, location='lower left') # 1 pixel = 0.2 meter
     fig.gca().add_artist(scalebar)
     df.boundary.plot(ax=ax, facecolor='none', edgecolor='k');
@@ -1579,6 +1592,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     sl4 = round(float(mk41.loc[7,'Name']),2)
     in4 = round(float(mk41.loc[8,'Name']),2)
 
+
     figt1 = os.path.join(newdir, "figt1.png")
     fig = plt.figure()
     x = df_cc['Year'].astype(int)
@@ -1588,7 +1602,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     z = np.polyfit(x, y, 1)
     p = np.poly1d(z)
     plt.plot(x,p(x),"r--")
-    plt.fill_between(x, df_cc['tdegssp245_un'], df_cc['tdegssp245_ov'], color='b', alpha=.1)
+#     plt.fill_between(x, df_cc['tdegssp245_un'], df_cc['tdegssp245_ov'], color='b', alpha=.1)
     plt.title('Annual mean Temperature (deviation)') 
     plt.savefig(figt1, bbox_inches='tight',pad_inches = 0.1, dpi=100)
 
@@ -1601,7 +1615,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     z = np.polyfit(x, y, 1)
     p = np.poly1d(z)
     plt.plot(x,p(x),"r--")
-    plt.fill_between(x, df_cc['prssp245_un'], df_cc['prssp245_ov'], color='b', alpha=.1)
+#     plt.fill_between(x, df_cc['prssp245_un'], df_cc['prssp245_ov'], color='b', alpha=.1)
     plt.title('Annual mean Precipitation (deviation)')
     plt.savefig(figt2, bbox_inches='tight',pad_inches = 0.1, dpi=100)
 
@@ -1614,7 +1628,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     z = np.polyfit(x, y, 1)
     p = np.poly1d(z)
     plt.plot(x,p(x),"r--")
-    plt.fill_between(x, df_cc['tdegssp585_un'], df_cc['tdegssp585_ov'], color='b', alpha=.1)
+#     plt.fill_between(x, df_cc['tdegssp585_un'], df_cc['tdegssp585_ov'], color='b', alpha=.1)
     plt.title('Annual mean Temperature (deviation)') 
     plt.savefig(figt3, bbox_inches='tight',pad_inches = 0.1, dpi=100)
 
@@ -1627,7 +1641,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     z = np.polyfit(x, y, 1)
     p = np.poly1d(z)
     plt.plot(x,p(x),"r--")
-    plt.fill_between(x, df_cc['prssp585_un'], df_cc['prssp585_ov'], color='b', alpha=.1)
+#     plt.fill_between(x, df_cc['prssp585_un'], df_cc['prssp585_ov'], color='b', alpha=.1)
     plt.title('Annual mean Precipitation (deviation)')
     plt.savefig(figt4, bbox_inches='tight',pad_inches = 0.1, dpi=100)
 
@@ -1640,7 +1654,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     mean = 100
 
     ## Mimic an empty mapset with WIND file for raster2numpy to work.
-    mapdir = os.path.join(settings.GRASS_DB, 'wagen', 'job{}'.format(jobid))
+    mapdir = os.path.join(settings.GRASS_DB, 'wagen_global', 'job{}'.format(jobid))
     windsrc = os.path.join(mapdir, 'WIND')
     winddst = os.path.join(newdir, 'WIND')
     shutil.copy2(windsrc, winddst)
@@ -1651,11 +1665,16 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     htmlfile1 = render_prod_html(jobid, myarea, stats)
     htmlfile2 = render_pdf_html(jobid, myarea, stats)
     pdffile = render_pdf(htmlfile2, jobid)
-    print("Preparing report")
-    sub="Your WA Generator report"
-    mess="Your WA generator report is ready. You can access the report using this link: http://wateraccounting.app/media/{}/index.html".format(jobid)
+    print("Preparing report !")
+    base_url = settings.BASE_URL
+
+    sub="Water Accounting Report"
+    mess = f"Your requested Water Accounting report is ready. You can access the report using this link: {base_url}/media/{jobid}/index.html"
+    
+
     to=current_user
-    #attach=pdffile
+
+    attach=pdffile
     #send_mail_attach(sub, mess, to, attach)
     return htmlfile1, pdffile
 
