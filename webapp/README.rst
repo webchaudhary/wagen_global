@@ -47,9 +47,9 @@ In the psql command:
 
 | *# Change password of postgres user*
 | ``ALTER USER postgres PASSWORD '*******';``
-| ``ALTER USER wagen PASSWORD '********';``
+| ``ALTER USER wagen_global PASSWORD '********';``
 | *# Give more privileges to user wagen*
-| ``ALTER USER wagen WITH SUPERUSER;``
+| ``ALTER USER wagen_global WITH SUPERUSER;``
 | *# quit psql*
 | ``\q``
 
@@ -130,8 +130,8 @@ DEPLOYMENT
   `sudo chown -R aman:aman /var/run/celery/`
 
   # copy the systemd configuration file
-  `ln -s /home/aman/wagen_global/webapp/wagen/celery_wagen_india.service /etc/systemd/system`
-  .. sudo ln -s /home/aman/wagen_global/webapp/wagen/celery_wagen_india.service /etc/systemd/system
+  `ln -s /home/aman/wagen_global/webapp/wagen/celery_wagen_global.service /etc/systemd/system`
+  .. sudo ln -s /home/aman/wagen_global/webapp/wagen/celery_wagen_global.service /etc/systemd/system
 
 
 .. EnvironmentFile=-/home/aman/wagen_global/webapp/wagen/celery.conf
@@ -140,10 +140,10 @@ DEPLOYMENT
   # modify the environment file if needed 
   # (for example the timeout for a single job set to 3000 seconds or number of concurrency set to 8)
 
-  # reload the systemd files (this has been done everytime celery_wagen.service is changed)
+  # reload the systemd files (this has been done everytime celery_wagen_global.service is changed)
   `sudo systemctl daemon-reload`
   # enable the service to be automatically start on boot
-  `sudo systemctl enable celery_wagen.service`
+  `sudo systemctl enable celery_wagen_global.service`
   ```
 
 * Start the celery app
@@ -155,12 +155,12 @@ DEPLOYMENT
   sudo systemctl status celery_wagen.service
 
   ls -lh /home/wagen/wagen/log/celery/
-  .. ls -lh /home/aman/wagen_india/webapp/wagen/log/celery/
-  .. ls -lh /home/nwic_user1/wagen_india/log/celery/
+  .. ls -lh /home/aman/wagen_global/webapp/wagen/log/celery/
+
   
   tail -f /home/wagen/wagen/log/celery/worker1.log
-  .. tail -f /home/aman/wagen_india/webapp/wagen/log/celery/worker1.log
-  .. tail -f /home/nwic_user1/wagen_india/log/celery/worker1.log
+  .. tail -f /home/aman/wagen_global/webapp/wagen/log/celery/worker1.log
+
   
 
 * Copy the template `ini` file and modify the paths
@@ -198,9 +198,8 @@ DEPLOYMENT
 
 
 
-.. sudo systemctl start celery_wagen_global.service
-uwsgi --ini /home/nwic_user1/wagen_india/webapp/wagen/wagen.ini
-uwsgi --ini /home/aman/wagen_india/webapp/wagen/wagen.ini
+`sudo systemctl start celery_wagen_global.service`
+`uwsgi --ini /home/aman/wagen_global/webapp/wagen/wagen_global.ini`
 
 
 
@@ -230,12 +229,12 @@ Restart the celery and uWSGI in development after updates
 
 
 #Monitoring Logs
-`tail -n 100 /home/aman/wagen_india/log/celery/worker1-7.log
-tail -n 100 /home/aman/wagen_india/log/celery/worker1-6.log
-tail -n 100 /home/aman/wagen_india/log/celery/worker1.log`
+`tail -n 100 /home/aman/wagen_global/log/celery/worker1-7.log
+tail -n 100 /home/aman/wagen_global/log/celery/worker1-6.log
+tail -n 100 /home/aman/wagen_global/log/celery/worker1.log`
 
 
-`for file in /home/aman/wagen_india/log/celery/*.log; do
+`for file in /home/aman/wagen_global/log/celery/*.log; do
     echo "Checking $file"
     tail -n 20 $file
 done`
