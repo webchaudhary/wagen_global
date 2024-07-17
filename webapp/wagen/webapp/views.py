@@ -21,7 +21,7 @@ from fiona.crs import from_epsg
 from fiona.transform import transform_geom
 from .models import Area
 from .models import TaskHistory
-from .tasks import simple_test
+# from .tasks import simple_test
 from .tasks import report_basin
 # Create your views here.
 

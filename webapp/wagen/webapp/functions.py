@@ -18,6 +18,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import jinja2
 from weasyprint import HTML
+from django.template.loader import render_to_string
 
 def send_mail_attach(sub, mess, to, attach):
     """Send email with attachment"""
@@ -46,17 +47,20 @@ def get_date():
     today = date.today()
     return today.strftime("%Y-%m-%d")
 
-def render_html(jobid, area):
-    """Render html page using jinja"""
-    template_loader = jinja2.FileSystemLoader(searchpath=os.path.join(settings.BASE_DIR, 'webapp', "templates"))
-    template_env = jinja2.Environment(loader=template_loader)
-    template_file = "report.html"
-    template = template_env.get_template(template_file)
-    output_text = template.render(area=area.name, settings=settings, job=jobid)
-    html_path = os.path.join(settings.MEDIA_ROOT, jobid, 'index.html')
-    with open(html_path, 'w') as html_file:
-        html_file.write(output_text)
-    return html_path
+# -----------------------------------
+# just for pdf generation testing purpose
+# -----------------------------------
+# def render_html(jobid, area):
+#     """Render html page using jinja"""
+#     template_loader = jinja2.FileSystemLoader(searchpath=os.path.join(settings.BASE_DIR, 'webapp', "templates"))
+#     template_env = jinja2.Environment(loader=template_loader)
+#     template_file = "report.html"
+#     template = template_env.get_template(template_file)
+#     output_text = template.render(area=area.name, settings=settings, job=jobid)
+#     html_path = os.path.join(settings.MEDIA_ROOT, jobid, 'index.html')
+#     with open(html_path, 'w') as html_file:
+#         html_file.write(output_text)
+#     return html_path
 
 def render_prod_html(jobid, area, stats):
     """Render html page using jinja"""
@@ -71,16 +75,21 @@ def render_prod_html(jobid, area, stats):
     return html_path
 
 def render_pdf_html(jobid, area, stats):
-    """Render html page using jinja"""
+    """Render HTML page using Django templates"""
     template_loader = jinja2.FileSystemLoader(searchpath=os.path.join(settings.BASE_DIR, 'webapp', "templates"))
     template_env = jinja2.Environment(loader=template_loader)
     template_file = "report_custom_pdf.html"
     template = template_env.get_template(template_file)
-    output_text = template.render(area=area.name, settings=settings, job=jobid, stats=stats)
+
+    base_url = settings.BASE_URL
+    output_text = template.render(area=area.name, settings=settings, job=jobid, stats=stats, base_url=base_url)
     html_path = os.path.join(settings.MEDIA_ROOT, jobid, 'report1.html')
     with open(html_path, 'w') as html_file:
         html_file.write(output_text)
     return html_path
+
+
+
 
 def render_pdf(htmlfile2, jobid):
     """Render pdf page from html using weasyprint"""
@@ -103,8 +112,7 @@ def render_pdf(htmlfile2, jobid):
     html_table_3 = df_table_3.to_html(index=False, classes='table table-bordered table-responsive', table_id='csv3Root', na_rep='')
     html_table_4 = df_table_4.to_html(index=False, classes='table table-bordered table-responsive', table_id='csv6Root', na_rep='')
 
-    # Parse the existing HTML file
-    # report1path = os.path.join(settings.MEDIA_ROOT, jobid, 'report1.html')
+
     with open(htmlfile2, 'r') as file:
         soup = BeautifulSoup(file, 'html.parser')
 
@@ -126,7 +134,8 @@ def render_pdf(htmlfile2, jobid):
         file.write(str(soup))
 
     reportpdfpath = os.path.join(settings.MEDIA_ROOT, jobid, 'report.pdf')
-    HTML(report2path).write_pdf(reportpdfpath)
+    HTML(report2path, base_url=settings.BASE_DIR).write_pdf(reportpdfpath)
+    # HTML(report2path).write_pdf(reportpdfpath)
     return reportpdfpath
 
 """ def render_pdf(html, jobid):

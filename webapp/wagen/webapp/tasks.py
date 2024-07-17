@@ -16,7 +16,7 @@ from django.conf import settings
 from celery import shared_task
 from .functions import render_prod_html
 from .functions import render_pdf_html
-from .functions import render_html
+# from .functions import render_html
 from .functions import render_pdf
 from .functions import send_mail_attach
 from .models import Area
@@ -43,131 +43,135 @@ import geopandas as gdf
 import pandas as pd
 import pymannkendall as mk
 
-@shared_task(bind=True)
-def simple_test(self, area, start, stop, precip, et, current_user):
-    jobid = self.request.id
-    print(jobid)
-    #user1 = User.email
-    print(current_user)
-    #print(user)
-    #create a new directory for each task as set names
-    newdir = os.path.join(settings.MEDIA_ROOT, jobid)
-    LC_ESA = os.path.join(settings.DATA_DIR, 'worldcover_ESA')
-    os.mkdir(newdir)
-    outimg = os.path.join(newdir, "map.png")
-    outhist = os.path.join(newdir, "hist.svg")
-    #GRASS variables
-    os.environ.update(dict(GRASS_COMPRESS_NULLS='1',
-                           GRASS_COMPRESSOR='ZSTD',
-                           GRASS_OVERWRITE='1'))
-    # create a GRASS Session instance with a new location and mapset
-    user = TmpSession()
-    # user.open(gisdb=settings.GRASS_DB, location='job{}'.format(jobid),
-    #               create_opts='EPSG:4326')
-    user.open(gisdb=settings.GRASS_DB, location='wagen_global',
-        mapset='{}'.format(jobid), create_opts='EPSG:4326')
 
-    from grass.pygrass.raster import RasterRow
-    from grass.pygrass.gis.region import Region
-    from grass.pygrass.raster import raster2numpy
-    #get the area and create a new GRASS vector for this
-    #from grass.pygrass.vector import VectorTopo
-    #from grass.pygrass.vector import geometry as geo 
-    myarea = Area.objects.get(id=area)
-    #centroid = geo.Point(myarea.geom.centroid.x, myarea.geom.centroid.y)
-    #bound = geo.Line([myarea[0][0]])
-    vectname = "{na}_{job}".format(na=myarea.name.replace(' ', ''),
-                                   job=jobid.replace("-", "_"))
-    #new = VectorTopo(vectname)
-    #new.open('w')
-    #area = geo.Area(boundary=bound, centroid=centroid)
-    #new.write(area)
-    #new.close()
-    v.in_ogr(input="PG:dbname={db} host={add} port={po} user={us} "
-             "password={pwd}".format(db=settings.DATABASES['default']['NAME'],
-                                     add=settings.DATABASES['default']['HOST'],
-                                     po=settings.DATABASES['default']['PORT'],
-                                     us=settings.DATABASES['default']['USER'],
-                                     pwd=settings.DATABASES['default']['PASSWORD']),
-             output=vectname, where="id={}".format(area))
+# -----------------------------------
+# Testing create report function
+# -----------------------------------
+# @shared_task(bind=True)
+# def simple_test(self, area, start, stop, precip, et, current_user):
+#     jobid = self.request.id
+#     print(jobid)
+#     #user1 = User.email
+#     print(current_user)
+#     #print(user)
+#     #create a new directory for each task as set names
+#     newdir = os.path.join(settings.MEDIA_ROOT, jobid)
+#     LC_ESA = os.path.join(settings.DATA_DIR, 'worldcover_ESA')
+#     os.mkdir(newdir)
+#     outimg = os.path.join(newdir, "map.png")
+#     outhist = os.path.join(newdir, "hist.svg")
+#     #GRASS variables
+#     os.environ.update(dict(GRASS_COMPRESS_NULLS='1',
+#                            GRASS_COMPRESSOR='ZSTD',
+#                            GRASS_OVERWRITE='1'))
+#     # create a GRASS Session instance with a new location and mapset
+#     user = TmpSession()
+#     # user.open(gisdb=settings.GRASS_DB, location='job{}'.format(jobid),
+#     #               create_opts='EPSG:4326')
+#     user.open(gisdb=settings.GRASS_DB, location='wagen',
+#         mapset='{}'.format(jobid), create_opts='EPSG:4326')
+
+#     from grass.pygrass.raster import RasterRow
+#     from grass.pygrass.gis.region import Region
+#     from grass.pygrass.raster import raster2numpy
+#     #get the area and create a new GRASS vector for this
+#     #from grass.pygrass.vector import VectorTopo
+#     #from grass.pygrass.vector import geometry as geo 
+#     myarea = Area.objects.get(id=area)
+#     #centroid = geo.Point(myarea.geom.centroid.x, myarea.geom.centroid.y)
+#     #bound = geo.Line([myarea[0][0]])
+#     vectname = "{na}_{job}".format(na=myarea.name.replace(' ', ''),
+#                                    job=jobid.replace("-", "_"))
+#     #new = VectorTopo(vectname)
+#     #new.open('w')
+#     #area = geo.Area(boundary=bound, centroid=centroid)
+#     #new.write(area)
+#     #new.close()
+#     v.in_ogr(input="PG:dbname={db} host={add} port={po} user={us} "
+#              "password={pwd}".format(db=settings.DATABASES['default']['NAME'],
+#                                      add=settings.DATABASES['default']['HOST'],
+#                                      po=settings.DATABASES['default']['PORT'],
+#                                      us=settings.DATABASES['default']['USER'],
+#                                      pwd=settings.DATABASES['default']['PASSWORD']),
+#              output=vectname, where="id={}".format(area))
     
-    # execute some command inside PERMANENT
-    #g.mapsets(flags="l")
-    g.region(vector=vectname, res=0.01)
-    r.random_surface(flags="u", output="randomsurface")
-    d.mon(start='cairo', output=outhist)
-    d.histogram(map="randomsurface")
-    d.mon(stop="cairo")
-    r.mapcalc(expression="selected=if(randomsurface>100,randomsurface,null())")
-    d.mon(start="cairo", output=outimg)
-    d.rast(map="selected")
-    d.vect(map=vectname, fill_color="none", color="red", width=1)
-    d.mon(stop="cairo")
-    #deletebelow
-    ### Figure 1 - study area ###
-    g.mapsets(mapset="data_annual,data_monthly,grace", operation="add")
-    g.region(vector=vectname, res=0.005)
-    print("Hallo")
-    bbox = grass.parse_command('g.region', flags='pg')
-    print(bbox)
-    # compute area in ha of the studyarea
-    # Extract the extents
-    #spatial_extent=(28.9134,32.6882,29.9117,31.5939)
-    west = round(float(bbox['w']), 2)
-    east = round(float(bbox['e']), 2)
-    north = round(float(bbox['n']), 2)
-    south = round(float(bbox['s']), 2)
-    spatial_extent=(float(bbox['w']),float(bbox['e']),float(bbox['s']),float(bbox['n']))
-    ## Correcting Region() manually for the raster2numpy to work
-    print("hallo again")
-    #reg = Region().from_vect(vectname)
-    reg = Region()
-    reg.north = float(bbox['n'])
-    reg.south = float(bbox['s'])
-    reg.west = float(bbox['w'])
-    reg.east = float(bbox['e'])
-    reg.nsres = float(bbox['nsres'])
-    reg.ewres = float(bbox['ewres'])
-    reg.rows = int(bbox['rows'])
-    reg.cols = int(bbox['cols'])
-    reg.write()
-    reg.set_raster_region()
-    #g.mapset(mapset='job{}'.format(jobid))
-    #grass.mapcalc('{r} = {a}'.format(r=f'dem_alos1', a=f'dem_alos'))
-    print("hallo again2")
-    #g.mapset mapset=user1
-    #region = Region()
-    #region = reg.from_vect(vectname)
-    dem=raster2numpy("dem_alos", mapset="PERMANENT")
-    dem = np.ma.masked_where(dem == -2147483648, dem)
-    fig1 = os.path.join(newdir, "fig1.png")
-    fig, ax = plt.subplots(figsize = (12,8))
-    plt.imshow(dem, cmap='terrain', vmin=10, vmax=np.nanmax(dem), extent=spatial_extent)
-    scalebar = ScaleBar(100, 'km', box_color='w', box_alpha=0.7, location='lower left') # 1 pixel = 0.2 meter
-    fig.gca().add_artist(scalebar)
-    df.boundary.plot(ax=ax, facecolor='none', edgecolor='k');
-    x, y, arrow_length = 1.1, 0.1, 0.1
-    ax.annotate('N', xy=(x, y), xytext=(x, y-arrow_length),
-            arrowprops=dict(facecolor='black', width=5, headwidth=15),
-            ha='center', va='center', fontsize=18, xycoords=ax.transAxes)
-    #ax.legend(bbox_to_anchor=(0.17,0.2))
-    plt.colorbar(shrink=0.50, label='Elevation[meters]')
-    plt.xlabel('Longitude ($^{\circ}$ East)', fontsize=10)  # add axes label
-    plt.ylabel('Latitude ($^{\circ}$ North)', fontsize=10)
-    plt.title('Study area', fontsize=10)
-    plt.savefig(fig1, bbox_inches='tight',pad_inches = 0, dpi=100)
-    #Delete till here
-    htmlfile = render_html(jobid, myarea)
-    pdffile = render_pdf(htmlfile, jobid)
-    print("dopo report")
-    sub="Your WA generator report"
-    mess="Your WA generator report is ready. You can access the report using this link: http://127.0.0.1:8000/media/{}/index.html".format(jobid)
-    to=current_user
-    attach=pdffile
-    plt.close('all')
-    #user.close()
-    send_mail_attach(sub, mess, to, attach)
-    return htmlfile, pdffile
+#     # execute some command inside PERMANENT
+#     #g.mapsets(flags="l")
+#     g.region(vector=vectname, res=0.01)
+#     r.random_surface(flags="u", output="randomsurface")
+#     d.mon(start='cairo', output=outhist)
+#     d.histogram(map="randomsurface")
+#     d.mon(stop="cairo")
+#     r.mapcalc(expression="selected=if(randomsurface>100,randomsurface,null())")
+#     d.mon(start="cairo", output=outimg)
+#     d.rast(map="selected")
+#     d.vect(map=vectname, fill_color="none", color="red", width=1)
+#     d.mon(stop="cairo")
+#     #deletebelow
+#     ### Figure 1 - study area ###
+#     g.mapsets(mapset="data_annual,data_monthly,grace", operation="add")
+#     g.region(vector=vectname, res=0.005)
+#     print("Hallo")
+#     bbox = grass.parse_command('g.region', flags='pg')
+#     print(bbox)
+#     # compute area in ha of the studyarea
+#     # Extract the extents
+#     #spatial_extent=(28.9134,32.6882,29.9117,31.5939)
+#     west = round(float(bbox['w']), 2)
+#     east = round(float(bbox['e']), 2)
+#     north = round(float(bbox['n']), 2)
+#     south = round(float(bbox['s']), 2)
+#     spatial_extent=(float(bbox['w']),float(bbox['e']),float(bbox['s']),float(bbox['n']))
+#     ## Correcting Region() manually for the raster2numpy to work
+#     print("hallo again")
+#     #reg = Region().from_vect(vectname)
+#     reg = Region()
+#     reg.north = float(bbox['n'])
+#     reg.south = float(bbox['s'])
+#     reg.west = float(bbox['w'])
+#     reg.east = float(bbox['e'])
+#     reg.nsres = float(bbox['nsres'])
+#     reg.ewres = float(bbox['ewres'])
+#     reg.rows = int(bbox['rows'])
+#     reg.cols = int(bbox['cols'])
+#     reg.write()
+#     reg.set_raster_region()
+#     #g.mapset(mapset='job{}'.format(jobid))
+#     #grass.mapcalc('{r} = {a}'.format(r=f'dem_alos1', a=f'dem_alos'))
+#     print("hallo again2")
+#     #g.mapset mapset=user1
+#     #region = Region()
+#     #region = reg.from_vect(vectname)
+#     dem=raster2numpy("dem_alos", mapset="PERMANENT")
+#     dem = np.ma.masked_where(dem == -2147483648, dem)
+#     fig1 = os.path.join(newdir, "fig1.png")
+#     fig, ax = plt.subplots(figsize = (12,8))
+#     plt.imshow(dem, cmap='terrain', vmin=10, vmax=np.nanmax(dem), extent=spatial_extent)
+#     scalebar = ScaleBar(100, 'km', box_color='w', box_alpha=0.7, location='lower left') # 1 pixel = 0.2 meter
+#     fig.gca().add_artist(scalebar)
+#     df.boundary.plot(ax=ax, facecolor='none', edgecolor='k');
+#     x, y, arrow_length = 1.1, 0.1, 0.1
+#     ax.annotate('N', xy=(x, y), xytext=(x, y-arrow_length),
+#             arrowprops=dict(facecolor='black', width=5, headwidth=15),
+#             ha='center', va='center', fontsize=18, xycoords=ax.transAxes)
+#     #ax.legend(bbox_to_anchor=(0.17,0.2))
+#     plt.colorbar(shrink=0.50, label='Elevation[meters]')
+#     plt.xlabel('Longitude ($^{\circ}$ East)', fontsize=10)  # add axes label
+#     plt.ylabel('Latitude ($^{\circ}$ North)', fontsize=10)
+#     plt.title('Study area', fontsize=10)
+#     plt.savefig(fig1, bbox_inches='tight',pad_inches = 0, dpi=100)
+#     #Delete till here
+#     htmlfile = render_html(jobid, myarea)
+#     pdffile = render_pdf(htmlfile, jobid)
+#     print("dopo report")
+#     sub="Your WA generator report"
+#     mess="Your WA generator report is ready. You can access the report using this link: http://127.0.0.1:8000/media/{}/index.html".format(jobid)
+#     to=current_user
+#     attach=pdffile
+#     plt.close('all')
+#     #user.close()
+#     send_mail_attach(sub, mess, to, attach)
+#     return htmlfile, pdffile
 
 @shared_task(bind=True)
 def report_basin(self, area, start, stop, precip, et, current_user):
@@ -192,12 +196,12 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     user = TmpSession()
     #user.open(gisdb=settings.GRASS_DB, location='job{}'.format(jobid),
     #               create_opts='EPSG:4326')
-    #user.open(gisdb=settings.GRASS_DB, location='wagen_global',
+    #user.open(gisdb=settings.GRASS_DB, location='wagen',
                    #mapset='job{}'.format(jobid), create_opts='EPSG:4326')
-    user.open(gisdb=settings.GRASS_DB, location='wagen_global',
+    user.open(gisdb=settings.GRASS_DB, location='wagen',
                    mapset='job{}'.format(jobid), create_opts='')
     #gisdb=settings.GRASS_DB
-    #location='wagen_global'
+    #location='wagen'
     #mapset='job{}'.format(jobid)
     #session = gsetup.init(gisdb, location, mapset)
 
@@ -1654,7 +1658,7 @@ def report_basin(self, area, start, stop, precip, et, current_user):
     mean = 100
 
     ## Mimic an empty mapset with WIND file for raster2numpy to work.
-    mapdir = os.path.join(settings.GRASS_DB, 'wagen_global', 'job{}'.format(jobid))
+    mapdir = os.path.join(settings.GRASS_DB, 'wagen', 'job{}'.format(jobid))
     windsrc = os.path.join(mapdir, 'WIND')
     winddst = os.path.join(newdir, 'WIND')
     shutil.copy2(windsrc, winddst)
