@@ -290,6 +290,7 @@ Possible errors
 
 
 # Check the socket file permissions after starting uWSGI:
+`tail -f /home/aman/wagen_global/webapp/wagen/log/wagen_global.log`
 `sudo tail -f /home/aman/wagen_global/webapp/wagen/log/wagen_global.log`
 
 # If permission errors occurred
