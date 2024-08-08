@@ -1428,7 +1428,7 @@
             url: "/addlayer",
             data: { namecol: $("#customName").val(), file: result }
           }).done(function (msg) {
-            console.log("msg_S", msg)
+
             $("#addLayer").modal('hide');
             $("#returnText").text("")
             $("#returnText").text(msg['result']);
@@ -1448,7 +1448,7 @@
       function addyear() {
         var today = new Date()
         //var thisyear = today.getFullYear()
-        var thisyear = 2021
+        var thisyear = 2023
         for (i = 2009; i <= thisyear; i++) {
           if (i == 2010) {
             $('#startdate').append('<option value="' + i + '" selected>' + i + '</option>')
